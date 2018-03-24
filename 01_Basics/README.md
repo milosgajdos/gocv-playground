@@ -11,13 +11,13 @@ We will demonstrate basic read/write operarions using an image of my favorite fo
 Read color image:
 
 ```go
-	imgPath := filepath.Join("messi.jpg")
-	// read in a color image
-	img := gocv.IMRead(imgPath, gocv.IMReadColor)
-	if img.Empty() {
-		fmt.Printf("Failed to read image %s\n", imgPath)
-		os.Exit(1)
-	}
+imgPath := filepath.Join("messi.jpg")
+// read in a color image
+img := gocv.IMRead(imgPath, gocv.IMReadColor)
+if img.Empty() {
+	fmt.Printf("Failed to read image %s\n", imgPath)
+	os.Exit(1)
+}
 ```
 
 (Image) Format of the file is determined by its content (first few bytes). `gocv` by default reads in image in *BGR* color scheme, not `RGB`. Why? Because of historical [OpenCV](https://docs.opencv.org/trunk/index.html) [reasons](https://stackoverflow.com/questions/14556545/why-opencv-using-bgr-colour-space-instead-of-rgb). So, don't forget to convert the image into a color scheme you are interested in working with!
@@ -33,12 +33,12 @@ If you want to read a grayscale image or a colored image as grayscale, simply pa
 Write image to filesystem:
 
 ```go
-	// write an image into filesystem
-	outPath := filepath.Join("new_messi.jpg")
-	if ok := gocv.IMWrite(outPath, img); !ok {
-		fmt.Printf("Failed to write image: %s\n")
-		os.Exit(1)
-	}
+// write an image into filesystem
+outPath := filepath.Join("new_messi.jpg")
+if ok := gocv.IMWrite(outPath, img); !ok {
+	fmt.Printf("Failed to write image: %s\n")
+	os.Exit(1)
+}
 ```
 
 Format of the written file is determined by its extension. Note there is also `gocv.IMWriteWithParams` function which allows you to pass various image write [parameters](https://docs.opencv.org/master/d4/da8/group__imgcodecs.html#ga292d81be8d76901bff7988d18d2b42ac).
@@ -122,12 +122,12 @@ If we tried to find out the type of our grayscale image we would find out the ty
 `gocv`, just like OpenCV, provides a dedicated type to store pixel intensity values: `gocv.Scalar`, however it falls short in providing a conveniet function to return the pixel intensity values for particular color channels. When using `python` binding you can conveniently request pixel values by simply indexing an image i.e. `img[100,100]`. Getting pixel intensity values for each channel using `gocv` requires a bit more work:
 
 ```go
-	// split image channels
-	bgr := gocv.Split(img)
-        // pixel values for each channel - we know this is a BGR image
-	fmt.Printf("Pixel B: %d\n", bgr[0].GetUCharAt(100, 100))
-	fmt.Printf("Pixel G: %d\n", bgr[1].GetUCharAt(100, 100))
-	fmt.Printf("Pixel R: %d\n", bgr[2].GetUCharAt(100, 100))
+// split image channels
+bgr := gocv.Split(img)
+// pixel values for each channel - we know this is a BGR image
+fmt.Printf("Pixel B: %d\n", bgr[0].GetUCharAt(100, 100))
+fmt.Printf("Pixel G: %d\n", bgr[1].GetUCharAt(100, 100))
+fmt.Printf("Pixel R: %d\n", bgr[2].GetUCharAt(100, 100))
 ```
 
 Output:
@@ -152,10 +152,10 @@ Often you want to select a small region in the image and do something with it eg
 Let's demonstrate this on a simple example using our color image. We will select a region of the image that contains football and we will blur it. The code is simple:
 
 ```go
-	// image region
-	rec := image.Rectangle{Min: image.Point{214, 383}, Max: image.Point{292, 460}}
-	ball := img.Region(rec)
-	gocv.GaussianBlur(ball, ball, image.Pt(35, 35), 0, 0, gocv.BorderDefault)
+// rectangle region
+rec := image.Rectangle{Min: image.Point{214, 383}, Max: image.Point{292, 460}}
+ball := img.Region(rec)
+gocv.GaussianBlur(ball, ball, image.Pt(35, 35), 0, 0, gocv.BorderDefault)
 ```
 
 Note that the `image.Rectangle` values were figured out manually. I use my favorite macOS tool for this: pixelmator. Once you have the coordinate, you select the football region and then apply `gocv.GaussianBlur` on it. That will give you the following result:
@@ -169,8 +169,8 @@ Notice that the selected region points to a region of the original image so any 
 Finally, to conclude this chapter you can draw a border around the image using `gocv.CopyMakeBorder` function. There are several types of borders you can choose. We will demonstrate the functionality by using `gocv.BorderConstant` border type i.e. basic line border:
 
 ```go
-	blue := color.RGBA{B: 255}
-	gocv.CopyMakeBorder(img, img, 10, 10, 10, 10, int(gocv.BorderConstant), blue)
+blue := color.RGBA{B: 255}
+gocv.CopyMakeBorder(img, img, 10, 10, 10, 10, int(gocv.BorderConstant), blue)
 ```
 
 The resulting image looks like this:
