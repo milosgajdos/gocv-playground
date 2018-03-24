@@ -22,9 +22,15 @@ if img.Empty() {
 
 (Image) Format of the file is determined by its content (first few bytes). `gocv` by default reads in image in *BGR* color scheme, not `RGB`. Why? Because of historical [OpenCV](https://docs.opencv.org/trunk/index.html) [reasons](https://stackoverflow.com/questions/14556545/why-opencv-using-bgr-colour-space-instead-of-rgb). So, don't forget to convert the image into a color scheme you are interested in working with!
 
-Notice that `gocv.IMRead` function accepts `gocv.IMReadFlag` as the second argument. There is a wide range of `gocv.IMReadFlag`s which can simplify reading different types of images. The above code shows how to read a colored image. `gocv.IMReadColor` flag will skip reading in alpha channel; you need to pass in `gocv.IMReadUnchanged` flag to read in all image channels.
+Notice that `gocv.IMRead` function accepts `gocv.IMReadFlag` as the second argument. There is a wide range of `gocv.IMReadFlag`s which can simplify reading different types of images. The above code shows how to read a colored image. `gocv.IMReadColor`.
 
-If you want to read a grayscale image or a colored image as grayscale, simply pass in `gocv.IMReadGrayScale` flag.Here is a grayscale image of Messi:
+If you want to read a grayscale image or a colored image as grayscale, simply pass in `gocv.IMReadGrayScale` flag to `gocv.IMRead`. This will read the image and convert it to grayscale color map:
+
+```go
+img := gocv.IMRead(imgPath, gocv.gocv.IMReadGrayScale)
+```
+
+Here is a grayscale image of Messi:
 
 <img src="./gray_messi.jpg" alt="Grayscale image of Messi" width="200">
 
@@ -41,11 +47,13 @@ if ok := gocv.IMWrite(outPath, img); !ok {
 }
 ```
 
-Format of the written file is determined by its extension. Note there is also `gocv.IMWriteWithParams` function which allows you to pass various image write [parameters](https://docs.opencv.org/master/d4/da8/group__imgcodecs.html#ga292d81be8d76901bff7988d18d2b42ac).
+Image format of the written file is determined by its extension.
+
+Note, there is also `gocv.IMWriteWithParams` function available which allows you to pass various image write [parameters](https://docs.opencv.org/master/d4/da8/group__imgcodecs.html#ga292d81be8d76901bff7988d18d2b42ac) that can modify the image file written to the filesystem.
 
 # Image matrix
 
-`gocv.IMRead` returns an image as `gocv.Mat` obkect which is basically a multidimensional array which stores values of pixels of the read in image. `gocv.Mat` type provides a lot of useful functions for getting the information about the read in image and its manipulation.
+`gocv.IMRead` returns an image as `gocv.Mat` object which is a multidimensional array which stores values of pixel intensities of the image. `gocv.Mat` type provides a lot of useful functions to work with the image. You can obtains lots of information about the read in image and manipulate the image in different ways.
 
 ## Image size
 
@@ -62,7 +70,7 @@ messi.jpg size: 480 x 388
 
 ## Image channels
 
-Every digital image has certain number of image channels. Colored images have R, G, B and alpha channel. You can obtain number of image channels using `Channels()` function.
+Every digital image has a certain number of channels. Colored images have R (Red), G (Green), B (Blue) and alpha (opacity) channel. You can obtain the number of the image channels using `Channels()` function.
 
 Color image:
 ```go
@@ -73,13 +81,14 @@ Output:
 ```
 messi.jpg channels: 3
 ```
+As you would expect grayscale image has only one channel.
 
 Grayscale image:
 ```
 messi.jpg channels: 1
 ```
 
-`gocv` provides a `Split()` function which allows you to extract particular image channel layer and work with it separately:
+`gocv` provides `Split()` function which allows you to extract particular image channel so you can work with it separately from the other channels:
 
 ```go
 fmt.Printf("Number of channels: %d\n", len(gocv.Split(img)))
@@ -90,7 +99,7 @@ Output:
 Number of channels: 3
 ```
 
-You can merge the channels in any chosen order back together using `gocv.Merge` function. The following code converts `BGR` image to `RGB` one:
+You can merge the split channels in any by you chosen order back together using `gocv.Merge` function. The following code converts `BGR` image to `RGB` one:
 
 ```
 bgr = gocv.Split(img)
@@ -99,7 +108,7 @@ gocv.Merge(bgr[2], bgr[1], bgr[0], img)
 
 ## Image type
 
-Every image read using OpenCV has a certain *image type*. Image type is not the same thing as Image Format (JPEG, PNG etc.). The type of the image is more related to things like color scheme etc. It's important to know the type of an image when accessing and manipulating image pixels.
+Every image read using OpenCV has a certain *image type*. Image type is not the same thing as Image Format (JPEG, PNG etc.). The type of the image is more related to things like color scheme etc. It's important to know the type of an image when accessing and manipulating image pixels using `gocv`.
 
 Finding out the image type is simple:
 ```go
@@ -111,7 +120,7 @@ Output
 Image type: 16
 ```
 
-This is a simple integer number, which inconveniently does not have a nice string printing function, however it's not that that hard to figure our the type of an image.
+Returned value is an integer, which inconveniently does not have a nice string printing function implemented, however it's not hard to figure our the type of an image.
 
 In the case of our color image, the image type would be `gocv.MatTypeCV8UC3` which basically means we have an unsigned integer 3 channels image. You can read more about it [here](https://stackoverflow.com/a/27184054/569763).
 
@@ -119,7 +128,7 @@ If we tried to find out the type of our grayscale image we would find out the ty
 
 ### Image pixels
 
-`gocv`, just like OpenCV, provides a dedicated type to store pixel intensity values: `gocv.Scalar`, however it falls short in providing a conveniet function to return the pixel intensity values for particular color channels. When using `python` binding you can conveniently request pixel values by simply indexing an image i.e. `img[100,100]`. Getting pixel intensity values for each channel using `gocv` requires a bit more work:
+`gocv`, just like OpenCV, provides a dedicated type to store pixel intensity values: `gocv.Scalar`, however it falls short in providing a conveniet function to return the pixel intensity values for all available color channels in one `go` slice: when using `python opencv` binding you can conveniently request pixel values (lists) by simply indexing an image i.e. `img[100,100]` would give you a list of all pixel values on the requested position in the image. Getting pixel intensity values for each channel using `gocv` requires a bit more work:
 
 ```go
 // split image channels
@@ -141,9 +150,9 @@ Notice a few things:
 * We know that the image we have read has three channels, ordered as BGR
 * We also know, that the image type is `gocv.MatTypeCV8UC3`
 
-This basically means we can access particular pixel intensity value using `GetUCharAt` function of type `gocv.Mat`. Equally, we can modify particular pixel intensity values by `gocv.SetUCharAt` function.
+This basically means we can access particular pixel intensity value using `GetUCharAt` function of type `gocv.Mat`. Equivalently, we can also modify particular pixel intensity values using `gocv.SetUCharAt` function.
 
-If we simply try to use `img.GetUCharAt(100, 100)` i.e. if we didn't separate the color channels, `gocv` would return only the last channel's value: in this case that would be R channel.
+If we simply try to use `img.GetUCharAt(100, 100)` i.e. if we didn't separate the color channels, `gocv` would return only the last channel's value: in this case that would be R channel since the image is read in BGR color scheme.
 
 ### Image region
 
