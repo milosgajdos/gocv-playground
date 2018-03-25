@@ -70,7 +70,7 @@ messi.jpg size: 480 x 388
 
 ## Image channels
 
-Every digital image has a certain number of channels. Colored images have R (Red), G (Green), B (Blue) and alpha (opacity) channel. You can obtain the number of the image channels using `Channels()` function.
+Every digital image has a certain number of channels. Colored images have R (Red), G (Green), B (Blue) and alpha (opacity) channel if the image has one. You can obtain the number of the image channels using `Channels()` function.
 
 Color image:
 ```go
