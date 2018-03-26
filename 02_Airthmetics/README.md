@@ -2,6 +2,12 @@
 
 This chapter covers the topic of digital image airthmetics. We will look at image addition, subtraction and bitwise operations. We will demonstrate all concepts on practical examples.
 
+Once again you must source the environment script before you try to run the sample code:
+
+```
+$ source env.sh
+```
+
 ## Image addition and subtraction
 
 It is possible to "add" two digital images together. `gocv` provides `Add()` function which calculates the addition; in context of digital image processing, "addition" means that the pixel intensity values of both images are added together pixel by pixel in each channel. This requires that the following conditions are met:

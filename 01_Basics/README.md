@@ -1,6 +1,10 @@
 # gocv basics
 
-This directory contains source files which demonstrate basic usage of [gocv](https://gocv.io/) `Go` package.
+This the basic usage of [gocv](https://gocv.io/) `Go` . The project directory contains `env.sh` file which you must source before you can run the sample code:
+
+```
+$ source env.sh
+```
 
 # Read image
 
