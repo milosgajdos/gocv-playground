@@ -59,7 +59,7 @@ Let's demonstrate this on a simple example. We will apply a *binary* threshold o
 // convert to grayscale
 gocv.CvtColor(logo, logo, gocv.ColorBGRToGray)
 // create binary image
-gocv.Threshold(logo, logo, 10.0, 255.0, gocv.ThresholdBinary)
+gocv.Threshold(logo, &logo, 10.0, 255.0, gocv.ThresholdBinary)
 ```
 
 What the above code does is, it checks all the pixel values and sets the ones which are higher than 10 to 255 (white) and the lower ones to 0 (black). The resulting image of logo looks like this:
@@ -75,11 +75,11 @@ Imagine you wanted to mask out some non-rectangular parts of an image (certain p
 ```go
 // create an inverse mask
 maskInv := gocv.NewMat()
-gocv.BitwiseNot(mask, maskInv)
+gocv.BitwiseNot(mask, &maskInv)
 // black-out the area of logo in roi i.e. in bottom left region
 roiMask := gocv.NewMat()
-gocv.Merge([]gocv.Mat{maskInv, maskInv, maskInv}, roiMask)
-gocv.BitwiseAnd(roi, roiMask, roi)
+gocv.Merge([]gocv.Mat{maskInv, maskInv, maskInv}, &roiMask)
+gocv.BitwiseAnd(roi, roiMask, &roi)
 ```
 What this code effectively does is it creates an image mask by assembling the binary thresholded image into 3 channels image mask - if were masking grayscale image we wouldn't have to do this, however we must do this now because `BitwiseAnd()` expect the mask and the source image to have both the exact size and the same number of channels. The net result of this operation is the masked out pixels will have their intensity set to 0 (black) in the resulting image:
 
@@ -94,15 +94,13 @@ What we need to do is to apply the original mask we have obtained earlier to the
 ```go
 // apply the mask on logo image
 logoMask := gocv.NewMat()
-gocv.Merge([]gocv.Mat{mask, mask, mask}, logoMask)
-gocv.BitwiseAnd(logo, logoMask, logo)
+gocv.Merge([]gocv.Mat{mask, mask, mask}, &logoMask)
+gocv.BitwiseAnd(logo, logoMask, &logo)
 // add logo to roi
-gocv.Add(roi, logo, roi)
+gocv.Add(roi, logo, &roi)
 ```
 The resulting image looks like this:
 
 <img src="./wiki_commons_messi.jpeg" alt="Wiki commons Messi" width="200">
 
 You can find the full code and some commented out snippets in the `main.go` in this project directory
-
-

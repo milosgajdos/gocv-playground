@@ -35,10 +35,10 @@ func main() {
 	// image region
 	rec := image.Rectangle{Min: image.Point{214, 383}, Max: image.Point{292, 460}}
 	ball := img.Region(rec)
-	gocv.GaussianBlur(ball, ball, image.Pt(35, 35), 0, 0, gocv.BorderDefault)
+	gocv.GaussianBlur(ball, &ball, image.Pt(35, 35), 0, 0, gocv.BorderDefault)
 	// draw a border around image
 	blue := color.RGBA{B: 255}
-	gocv.CopyMakeBorder(img, img, 10, 10, 10, 10, int(gocv.BorderConstant), blue)
+	gocv.CopyMakeBorder(img, &img, 10, 10, 10, 10, gocv.BorderConstant, blue)
 	// write an image into filesystem
 	//outPath := filepath.Join("new_messi.jpg")
 	//outPath := filepath.Join("gray_messi.jpg")

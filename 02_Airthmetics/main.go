@@ -39,23 +39,23 @@ func main() {
 	//gocv.AddWeighted(roi, 0.6, logo, 0.4, 0.0, roi)
 	// turn color image into grayscale
 	grayLogo := gocv.NewMat()
-	gocv.CvtColor(logo, grayLogo, gocv.ColorBGRToGray)
+	gocv.CvtColor(logo, &grayLogo, gocv.ColorBGRToGray)
 	// create a binary mask
 	mask := gocv.NewMat()
-	gocv.Threshold(grayLogo, mask, 10.0, 255.0, gocv.ThresholdBinary)
+	gocv.Threshold(grayLogo, &mask, 10.0, 255.0, gocv.ThresholdBinary)
 	// create an inverse mask
 	maskInv := gocv.NewMat()
-	gocv.BitwiseNot(mask, maskInv)
+	gocv.BitwiseNot(mask, &maskInv)
 	// black-out the area of logo in roi i.e. in bottom left region
 	roiMask := gocv.NewMat()
-	gocv.Merge([]gocv.Mat{maskInv, maskInv, maskInv}, roiMask)
-	gocv.BitwiseAnd(roi, roiMask, roi)
+	gocv.Merge([]gocv.Mat{maskInv, maskInv, maskInv}, &roiMask)
+	gocv.BitwiseAnd(roi, roiMask, &roi)
 	// apply the mask on logo image
 	logoMask := gocv.NewMat()
-	gocv.Merge([]gocv.Mat{mask, mask, mask}, logoMask)
-	gocv.BitwiseAnd(logo, logoMask, logo)
+	gocv.Merge([]gocv.Mat{mask, mask, mask}, &logoMask)
+	gocv.BitwiseAnd(logo, logoMask, &logo)
 	// add logo to roi
-	gocv.Add(roi, logo, roi)
+	gocv.Add(roi, logo, &roi)
 	// write new image to filesystem
 	//outPath := filepath.Join("add_logo_messi.jpeg")
 	//outPath := filepath.Join("add_weighted_logo_messi.jpeg")
