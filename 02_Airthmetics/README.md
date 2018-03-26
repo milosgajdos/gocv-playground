@@ -77,13 +77,11 @@ Imagine you wanted to mask out some non-rectangular parts of an image (certain p
 maskInv := gocv.NewMat()
 gocv.BitwiseNot(mask, maskInv)
 // black-out the area of logo in roi i.e. in bottom left region
-roiChans := gocv.Split(roi)
-for i := 0; i < len(roiChans); i++ {
-	gocv.BitwiseAnd(roiChans[i], maskInv, roiChans[i])
-}
-gocv.Merge(roiChans, roi)
+roiMask := gocv.NewMat()
+gocv.Merge([]gocv.Mat{maskInv, maskInv, maskInv}, roiMask)
+gocv.BitwiseAnd(roi, roiMask, roi)
 ```
-What this code effectively does is it splits `roi` (region of interest where we want to overlay our logo) into separate channels and applies the *inverse mask* to each of them. It then merges all of the channels together. The net result is the masked out pixels will have their intensity set to 0 (black) in the resulting image:
+What this code effectively does is it creates an image mask by assembling the binary thresholded image into 3 channels image mask - if were masking grayscale image we wouldn't have to do this, however we must do this now because `BitwiseAnd()` expect the mask and the source image to have both the exact size and the same number of channels. The net result of this operation is the masked out pixels will have their intensity set to 0 (black) in the resulting image:
 
 <img src="./wiki_commons_blackout_messi.jpeg" alt="Wiki commons blackout Messi" width="200">
 
@@ -91,15 +89,13 @@ What this code effectively does is it splits `roi` (region of interest where we 
 
 Now that we know how to apply masks and how to do basica airthmetic operations, we can put it all together and overlay the wiki commons log on top of the image of Messi.
 
-What we need to do is apply the original mask we have obtained earlier to the wiki commons logo and then add together the resulting regions:
+What we need to do is to apply the original mask we have obtained earlier to the wiki commons logo and then `Add()` the resulting region to the masked logo image:
 
 ```go
 // apply the mask on logo image
-logoChans := gocv.Split(logo)
-for i := 0; i < len(logoChans); i++ {
-	gocv.BitwiseAnd(logoChans[i], mask, logoChans[i])
-}
-gocv.Merge(logoChans, logo)
+logoMask := gocv.NewMat()
+gocv.Merge([]gocv.Mat{mask, mask, mask}, logoMask)
+gocv.BitwiseAnd(logo, logoMask, logo)
 // add logo to roi
 gocv.Add(roi, logo, roi)
 ```

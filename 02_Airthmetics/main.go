@@ -47,17 +47,13 @@ func main() {
 	maskInv := gocv.NewMat()
 	gocv.BitwiseNot(mask, maskInv)
 	// black-out the area of logo in roi i.e. in bottom left region
-	roiChans := gocv.Split(roi)
-	for i := 0; i < len(roiChans); i++ {
-		gocv.BitwiseAnd(roiChans[i], maskInv, roiChans[i])
-	}
-	gocv.Merge(roiChans, roi)
+	roiMask := gocv.NewMat()
+	gocv.Merge([]gocv.Mat{maskInv, maskInv, maskInv}, roiMask)
+	gocv.BitwiseAnd(roi, roiMask, roi)
 	// apply the mask on logo image
-	logoChans := gocv.Split(logo)
-	for i := 0; i < len(logoChans); i++ {
-		gocv.BitwiseAnd(logoChans[i], mask, logoChans[i])
-	}
-	gocv.Merge(logoChans, logo)
+	logoMask := gocv.NewMat()
+	gocv.Merge([]gocv.Mat{mask, mask, mask}, logoMask)
+	gocv.BitwiseAnd(logo, logoMask, logo)
 	// add logo to roi
 	gocv.Add(roi, logo, roi)
 	// write new image to filesystem
