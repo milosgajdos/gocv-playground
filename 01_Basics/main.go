@@ -20,10 +20,11 @@ func main() {
 		os.Exit(1)
 	}
 	// size of an image
-	fmt.Printf("%s size: %d x %d, channels: %d\n", imgPath, img.Rows(), img.Cols(), img.Channels())
+	fmt.Printf("%s size: %d x %d\n", imgPath, img.Rows(), img.Cols())
+	fmt.Printf("%s channels: %d\n", imgPath, img.Channels())
 	// split image channels
 	bgr := gocv.Split(img)
-	fmt.Printf("Number of channels: %d\n", len(bgr))
+	// gocv.Merge(bgr[2], bgr[1], bgr[0], &img)
 	// image type; for colored image: gocv.MatTypeCV8UC3
 	fmt.Printf("Image type: %v\n", img.Type())
 	// BGR pixel values
