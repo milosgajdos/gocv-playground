@@ -34,7 +34,7 @@ func main() {
 	maxX, maxY := logoCols, messiRows
 	rec := image.Rectangle{Min: image.Point{minX, minY}, Max: image.Point{maxX, maxY}}
 	roi := messi.Region(rec)
-	// add two images
+	// Add-ing two images
 	//gocv.Add(roi, logo, roi)
 	//gocv.AddWeighted(roi, 0.6, logo, 0.4, 0.0, roi)
 	// turn color image into grayscale
@@ -49,12 +49,13 @@ func main() {
 	// black-out the area of logo in roi i.e. in bottom left region
 	roiMask := gocv.NewMat()
 	gocv.Merge([]gocv.Mat{maskInv, maskInv, maskInv}, &roiMask)
+	// BitWiseAnd basically zero-s out the regions which have 0 intensity in in roiMask
 	gocv.BitwiseAnd(roi, roiMask, &roi)
 	// apply the mask on logo image
 	logoMask := gocv.NewMat()
 	gocv.Merge([]gocv.Mat{mask, mask, mask}, &logoMask)
 	gocv.BitwiseAnd(logo, logoMask, &logo)
-	// add logo to roi
+	// Add logo to roi: the logo pixels intensity was set to 0 - addition overlays original colors on it
 	gocv.Add(roi, logo, &roi)
 	// write new image to filesystem
 	//outPath := filepath.Join("add_logo_messi.jpeg")

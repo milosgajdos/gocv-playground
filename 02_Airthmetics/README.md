@@ -180,11 +180,11 @@ What the above code does is, it checks all the pixel values in logo image and se
 
 Imagine you wanted to overlay something on top of some non-rectangular part of an image region, such as placing the Wikimedia commons logo on the image of Messi. The logo has some weird shapes in it which are definitely not rectangular, so an easy rectangular region technique we saw in the previous chapter won't do the trick.
 
-What we need to do instead is to black-out a region of interest (`roi`) in the image in the areas where the logo would fit in. 
-This sounds kinda hard, but you will notice that it's actually pretty easy using our existing knowledge. Let's demonstrate this on a practical example.
+What we need to do instead is to black-out a region of interest (`roi`) in the image in the areas where the logo would fit in.
+This sounds kinda hard, but you will notice that it's actually pretty easy to do using our existing knowledge. Let's demonstrate this on a practical example.
 
-We will combine the knowledge of image thresholding and masking we talked about earlier. First we will create an image mask. Image mask is basically a `gocv.Mat` that only contains "binary" values: `0` (black) and some non-zero value (could be white, but not necessarily - depending on the thresholding options). Once we have the mask, we will create an *inverse* mask of it. This will flip the original mask pixel values by applying logical NOT on it i.e. the weird logo regions will have pixel values set to `0` (black). This might seem counter-intuitive but it will make sense later on, so take a leap of faith with me.
- 
+We will combine the knowledge of image thresholding and masking we talked about earlier. First we will create an **image mask**. Image mask is basically a `gocv.Mat` that only contains "binary" values: `0` (black) and some non-zero value (could be white, but not necessarily, depending on the thresholding options). Once we have the mask, we will create an *inverse* mask of it. This will flip the original mask pixel values by applying logical NOT on it i.e. the weird logo regions will have pixel values set to `0` (black). This might seem counter-intuitive but it will make sense later on, so take a leap of faith with me.
+
 Unfortunately `gocv` doesn't seem to have any convenient function that would let us apply a mask on colored images in one function call, so what we need to do is a bit more elaborate:
 
 ```go

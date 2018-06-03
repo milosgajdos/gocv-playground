@@ -33,9 +33,10 @@ func main() {
 	fmt.Printf("Pixel R: %d\n", bgr[2].GetUCharAt(100, 100))
 	// Same as the last channel value i.e. R
 	fmt.Printf("Pixel (same as R): %d\n", img.GetUCharAt(100, 100))
-	// image region
+	// ball image region: image coordinates have been selected manually
 	rec := image.Rectangle{Min: image.Point{214, 383}, Max: image.Point{292, 460}}
 	ball := img.Region(rec)
+	// This will blur the selected ball region
 	gocv.GaussianBlur(ball, &ball, image.Pt(35, 35), 0, 0, gocv.BorderDefault)
 	// draw a border around image
 	blue := color.RGBA{B: 255}
