@@ -2,12 +2,6 @@
 
 This chapter covers the basics of working with [gocv](https://gocv.io/). We will look at how to read and write digital images using `gocv` and how they're represented in `gocv`'s API. Armed with this knowledge, we will proceed to slightly more advanced topics such as image region selection, image blurring and image borders.
 
-Before you attempt to run any of the code which is showed in the `README` or present in the `main.go` file you have to export few environment variables `gocv` uses to compile the source code against the core `OpenCV` libraries. You can find a small script (`env.sh`) in this directory which can take care of this for you - simply `source` it like this:
-
-```
-$ source env.sh
-```
-
 # Read image
 
 Reading digital images using `gocv` is super easy. Let's show how to do this on an image of my favorite football player: [Lionel Messi](https://en.wikipedia.org/wiki/Lionel_Messi) [1](https://commons.wikimedia.org/wiki/File:Lionel_Messi_Player_of_the_Year_2011.jpg):

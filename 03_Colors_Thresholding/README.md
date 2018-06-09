@@ -4,15 +4,9 @@ In the previous chapter we had a quick look at digital image airthmetics and how
 
 We have scratched upon a concept of color spaces and image thresholding, but didn't dedicate much time to it. This chapter will take a closer a look at both of these topics.
 
-As always if you want to run/build any of the code mentioned in this `README` you must source the `env.sh` script which exports a few environment variables needed to build any code that uses `gocv`:
-
-```
-$ source env.sh
-```
-
 ## Colorspaces
 
-Digital images are usually composed of several "layers" of colors often referred to as color channels (even a grayscale image can have alpha channel, turning the number of channels of the grayscale image to `2`). To make things more complicated there are different channel "types" a.k.a. color modes (or schemes), each of which encodes color channels in different way. Each color mode has its cons and pros whicih we won't deal with here. Instead we will have a look at how to convert images between different color spaces and color modes using `gocv`.
+Digital images are usually composed of several "layers" of colors often referred to as color channels (even a grayscale image can have alpha channel, turning the number of channels of the grayscale image to `2`). To make things more complicated there are different channel "types" a.k.a. color spaces, each of which encodes color channels in different way. Each color mode has its cons and pros whicih we won't deal with here. Instead we will have a look at how to convert images between different color spaces and color modes using `gocv`.
 
 Most developers are familiar with `RGB` color mode, which splits the image into three color channels: Red (`R`), Green (`G`) and Blue (`B`). By default `gocv` reads a colored image in `BGR` color mode. Converting between different color modes is easy using `gocv.CvtColor()` function. Equally, the same function can be used for over 100 color conversion operations. Let's have a look at simple example of convertin a colored image into a grayscale image:
 

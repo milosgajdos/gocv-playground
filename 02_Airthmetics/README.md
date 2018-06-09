@@ -2,12 +2,6 @@
 
 This chapter covers the topic of digital image airthmetics. It might sound strange to think you can do arithmetics with digital images, but image arithmetics is one of the most fundamental topics of digital image processing. In this chapter we will look at image addition, subtraction and bitwise operations. We will demonstrate all concepts on practical examples.
 
-As always if you want to run/build any of the code mentioned in this `README` you must source the `env.sh` script which exports a few environment variables needed to build any code that uses `gocv`:
-
-```
-$ source env.sh
-```
-
 ## Addition and subtraction
 
 In the context of digital image processing, *addition* means that corresponding pixel intensity values of each image in the sum are added together per each channel. This requires that the following conditions must be be met before adding the images together:
