@@ -8,11 +8,11 @@ Once again we will demonstrate the functionality on the familiar image of Messi:
 
 ## Scaling
 
-Scaling images basically means resizing their size by either shrinking them or enlarging them. Resizing image can be done using `gocv.Resize` function. You can either specify the image size via the `image.Point` parameter or scale factors for both dimensions. See the [documentation](https://godoc.org/gocv.io/x/gocv#Resize) for more detail. As for the actual scaling algorithm, you have a few options to choose from. The official `OpenCV` documentation recommends to use `gocv.InterpolationArea` interpolation type when shrinking the images, whereas when enlarging them, it's the best to use `gocv.InterpolationCubic` (a bit slow) or `gocv.InterpolationLinear` which is default and faster, but not as good.
+Scaling images basically means resizing their size by either shrinking them or enlarging them. Resizing image can be done using `gocv.Resize()` function. You can either specify the image size via the `image.Point` parameter or via scale factors for both image dimensions. See the [documentation](https://godoc.org/gocv.io/x/gocv#Resize) for more detail.
 
-Once we have the rotation transformation matrix, we can use the `WarpAffine()` function to do the heavy lifting for us. There is also `WarpAffineWithParams()` function which provides more parameters to control the transformation such border type around the transformed image or the interpolation type (by default it's set to `InterpolationLinear`).
+As for the actual scaling algorithm, there are a few options to choose from. The official `OpenCV` documentation recommends to use `gocv.InterpolationArea` interpolation type **when shrinking** the images, whereas **when enlarging**, it's the best to use `gocv.InterpolationCubic` (apparently, a bit slow) or `gocv.InterpolationLinear` which is the default and faster, but not as good.
 
-The following code demonstrates shrinking and elarging of Messing image:
+Following code demonstrates both shrinking and elarging of Messi image:
 
 ```go
 package main
@@ -59,18 +59,18 @@ func main() {
 }
 ```
 
-And here are the resulting images:
+And here are the resulting images - note the slightly smaller resolution of the first one:
 
 <img src="./small_messi.jpeg" alt="Small Messi" width="200">
 <img src="./large_messi.jpeg" alt="Messi" width="200">
 
 ## Rotation
 
-Image rotation is a rather complex topic which involves transforming an image using [transformation matrix](https://en.wikipedia.org/wiki/Transformation_matrix) into a new image. The transformation matrix can be crafted either manually or using the `gocv` functions, but before we talk about the complex arbitrary image rotations let's have a look how to perform the simplest forms of rotation: rotation by multple of 90 degrees clockwise or counter clockwise.
+Image rotation is a rather complex topic which involves transforming an image using [transformation matrix](https://en.wikipedia.org/wiki/Transformation_matrix) into a new image. The transformation matrix can be crafted either manually or using `gocv` helper functions, but before we talk about the complex arbitrary image rotations in more detail let's have a look how to perform the simplest form of rotation: rotation by multple of 90 degrees clockwise or counter clockwise.
 
 ## Simple Rotation
 
-If we want to rotate an image just by 90 degrees [counter] clockwise we can use `Rotate()` function and supply appropriate `RotateFlag` to it. See the sample code below:
+If we want to rotate an image just by multiple of 90 degrees [counter] clockwise we can use `gocv.Rotate()` function and supply appropriate `RotateFlag` to instruct what kind of rotation we are interested in doing. See the sample code below which rotates the Messig image by 90 degrees clockwise:
 
 ```go
 package main
@@ -103,7 +103,7 @@ func main() {
 }
 ```
 
-And here is the image rotated 90 degrees clockwise:
+Here is the resulting image:
 
 <img src="./rotated_messi.jpeg" alt="Rotated Messi" width="200">
 
@@ -111,7 +111,11 @@ There are a few more rotation flags available in `gocv`, so plese do check out t
 
 ## Arbitrary rotations
 
-If you want to do more interesting rotations than just by 90 degrees you will have to perform [affine transformation](https://en.wikipedia.org/wiki/Affine_transformation) using the aforementioned transformation matrix. Luckily, you don't have to construct the matrix manually as `gocv` provides a convenient helper function called `GetRotationMatrix2D` which creates and returns the matrix to us. So let's have a look how we can perform the same rotation we did earlier i.e. by 90 degrees.
+If you want to do more interesting rotations than just by 90 degrees you will have to perform [affine transformation](https://en.wikipedia.org/wiki/Affine_transformation) on the image using the aforementioned transformation matrix. Luckily, you don't normally have to construct the matrix manually as `gocv` provides convenient helper functions to do this.
+
+For the purpose of roattion image transformation we can use `gocv.GetRotationMatrix2D()` function which creates and returns the transformation matrix to us. So let's have a look how we can perform the same rotation we did earlier i.e. by 90 degrees.
+
+Once we have the rotation transformation matrix, we can use `gocv.WarpAffine()` function to do the heavy lifting for us. There is also `WarpAffineWithParams()` function which provides more parameters to control the transformation such border type around the transformed image or the interpolation type (by default it's set to `InterpolationLinear`).
 
 A naive approach would look something like this (I will explain, later on why this approach is naive):
 
@@ -152,17 +156,21 @@ func main() {
 }
 ```
 
-This however, to our surprise, might not produce an image we may have expected:
+Judging by the look of the image below, it should be clearer to us why I called this rotation **naive**:
 
 <img src="./naive_rotated_messi.jpeg" alt="Naive Rotated Messi" width="200">
 
-Notice how the resulting image gets truncated: Messi is missing a part of his head and foot! The reason for this lies in the size of the resulting image we have chosen the rotated image to be transformed into. We naively chose the size of the resulting image to be the same as the original and it's clearly not big enough. We could increase the size of the resulting image or we could set the scale factor to be less than `1.0`. Both of these approaches are not ideal: in the former we would have to empirically find the right image size to fit the Messi in, in the latter the original image would be shrunk. Instead we will do a bit of linear algebra to find out the right resulting image dimensions without sacrificing the size of the original image.
+Notice how the resulting image is truncated: Messi is missing a part of his head and foot! The reason for this lies in the size of the resulting image we have chosen the rotated image to be transformed into. We have naively picked the size of the transformed image to be the same as the original one and it's clearly not big enough.
 
-For completeness, the problem with the size of the resulting image gets similarly weird if we choose an arbitrary non-90-degrees-multiple angle, such as 30 degrees:
+Now, we could increase the size of the resulting image or we could set the scale factor to be less than `1.0`. Both of these approaches would work, but are not great: using the former we would have to empirically find the right image size to fit the rotated Messi in, using the latter the original image would be shrunk. Instead, we will do a bit of linear algebra to find out the right resulting image dimensions without sacrificing the size of the original image.
+
+For completeness, the problem with the size of the resulting image gets similarly weird if we choose an arbitrary rotation i.e. not just by multiples of 90 degrees, such as 30 degrees:
 
 <img src="./naive_30_rotated_messi.jpeg" alt="Naive 30 Rotated Messi" width="200">
 
-I dont want to go too much into the maths of how the affine transformations work, but in laymens terms, the transformation does not change the intensity of the pixels, it merely "shifts" them into a new location in the same linear space (alas, different "image" space). The shift can be calculated by a simple matrix multiplication using the coordinates of the original pixel position on the 2D image plane and particular [transformation matrix](https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation). The transformation will give us cartesian space coordinates which we can use to compute the new image size (by calculating the position of the [`width`, `height`] point). In short, we will be doing the following:
+I dont want to go into too much into the maths of how the affine transformations work, but in laymens terms, the transformation does not change the intensity of the pixels, it merely "shifts" them into a new location in the same linear space (alas, different "image" space).
+
+The shift can be calculated by a simple matrix multiplication using the coordinates of the original pixel position on the 2D image plane and particular [transformation matrix](https://en.wikipedia.org/wiki/Affine_transformation#Image_transformation). The transformation will give us cartesian space coordinates which we can use to compute the new image size (by calculating the position of the [`width`, `height`] point). In short, we will be doing the following:
 * Apply Scaling
 * Apply Rotation
 * Apply Trasvection (shift)
@@ -228,38 +236,3 @@ func main() {
 The resulting image clearly shows that the image is properly rotated by 45 degrees without any truncation, alas, obviously the size of the new image has increased:
 
 <img src="./rotated_properly_messi.jpeg" alt="Properly Rotated Messi" width="200">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
