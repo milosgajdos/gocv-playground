@@ -236,3 +236,83 @@ func main() {
 The resulting image clearly shows that the image is properly rotated by 45 degrees without any truncation, alas, obviously the size of the new image has increased:
 
 <img src="./rotated_properly_messi.jpeg" alt="Properly Rotated Messi" width="200">
+
+## Perspective transformation
+
+Before we finish this chapter, let's briefly talk about one last case of geometric transformations: perspective transformation. Perspective transformation is a very important concept used for example in digital cameras. Just like in the case of image rotation, in order to perform perspective transformation we will need a transformation matrix. Computing this matrix can be a bit laborious, despite `gocv` providing us with a handy helper function: `gocv.GetPerspectiveTransform()`. This function accepts two slices of `image.Point`s which should contain coordinates of the points, location of which we are transforming from one plane to another. This was a bit of a mouthful, so let's illustrate this on a simple example.
+
+A classic schoolbook example of perspective transformation is an image "alignment" when an image of some landmark has been taken by a camera from a "weird" angle. The problem now is a bit of distortion of the landmark as well as some of the landmark's features are not properly visible. By applying the perspective transformation we can correct the image and bring the landmark closer to the viewer's perspective by aligning it with the edges of the projection image plane. Let's see what we mean by that by looking at the following picture of a random [business card](https://commons.wikimedia.org/wiki/File:Free-business-cards.jpg) [1]
+
+<img src="./card.jpg" alt="Business card" width="200">
+
+The image of the business card is a bit rotated and thus applying some kind of [OCR](https://en.wikipedia.org/wiki/Optical_character_recognition) can be a bit tricky -- we would like to bring the picture closer to the viewers perspective by "projecting" it to the viewer's plane so it is better visible. Obviously, the image in this example is just a simple example, but the same concept can be applied on a way more complicated pictures of lets say texts of books or whatnot.
+
+In order to apply the perspective transformation on the image we can use the following code:
+
+```go
+import (
+	"fmt"
+	"image"
+	"math"
+	"os"
+	"path/filepath"
+
+	"gocv.io/x/gocv"
+)
+
+func main() {
+	cardPath := filepath.Join("card.jpg")
+	// read image
+	card := gocv.IMRead(cardPath, gocv.IMReadColor)
+	if card.Empty() {
+		fmt.Printf("Failed to read image: %s\n", cardPath)
+		os.Exit(1)
+	}
+
+        // image coordinages corners of the select business card object
+	origImg := []image.Point{
+		image.Point{128, 165}, // top-left
+		image.Point{215, 275}, // bottom-left
+		image.Point{385, 128}, // bottom-right
+		image.Point{300, 40},  // top-right
+	}
+
+	// calculate height as a distance between (top-left, bottom-left) and (top-right, bottom-right)
+	heightA := math.Sqrt(math.Pow(float64(origImg[0].X-origImg[1].X), 2) + math.Pow(float64(origImg[0].Y-origImg[1].Y), 2))
+	heightB := math.Sqrt(math.Pow(float64(origImg[3].X-origImg[2].X), 2) + math.Pow(float64(origImg[3].Y-origImg[2].Y), 2))
+	height := int(math.Max(heightA, heightB))
+
+	// caluclate width as a distance between () and ()
+	widthA := math.Sqrt(math.Pow(float64(origImg[0].X-origImg[3].X), 2) + math.Pow(float64(origImg[0].Y-origImg[3].Y), 2))
+	widthB := math.Sqrt(math.Pow(float64(origImg[1].X-origImg[2].X), 2) + math.Pow(float64(origImg[1].Y-origImg[2].Y), 2))
+	width := int(math.Max(widthA, widthB))
+
+	newImg := []image.Point{
+		image.Point{0, 0},
+		image.Point{0, height},
+		image.Point{width, height},
+		image.Point{width, 0},
+	}
+
+	transform := gocv.GetPerspectiveTransform(origImg, newImg)
+
+	perspective := gocv.NewMat()
+	gocv.WarpPerspective(card, &perspective, transform, image.Point{width, height})
+
+	outPath := filepath.Join("card_perspective.jpg")
+	if ok := gocv.IMWrite(outPath, perspective); !ok {
+		fmt.Printf("Failed to write image: %s\n")
+		os.Exit(1)
+	}
+}
+```
+
+And this is the resulting image
+
+<img src="./card_perspective.jpg" alt="Business card perspective" width="200">
+
+There are some important points to note here. First, in order to find the perspective transformation matrix we need to select 4 points of interest in the original image read from local filesystem of which 3 must not be collinear. These are stored in the `origImg` slice. We need to map these points into corresponding point in the transformed image: these are stored in the `newImg` slice. Note that we figured out the size of the image based on the original coordinates, trying to "preserve" the size of the original image -- at least to some extent. The size of this image is passed in to the `gocv.WarpPerspective` function which handles the image transformation.
+
+With this final example we will conclude this chapter on the geometric transformation of images, but please do check out other image transformations options.
+
+[1] Free business cards, Wikimedia, [https://commons.wikimedia.org/wiki/File:Free-business-cards.jpg](https://commons.wikimedia.org/wiki/File:Free-business-cards.jpg)
