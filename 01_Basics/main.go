@@ -42,12 +42,15 @@ func main() {
 	blue := color.RGBA{B: 255}
 	gocv.CopyMakeBorder(img, &img, 10, 10, 10, 10, gocv.BorderConstant, blue)
 	// write an image into filesystem
+	filename := "border_blur_messi.jpg"
 	//outPath := filepath.Join("new_messi.jpg")
 	//outPath := filepath.Join("gray_messi.jpg")
 	//outPath := filepath.Join("blur_messi.jpg")
-	outPath := filepath.Join("border_blur_messi.jpg")
+	outPath := filepath.Join(filename)
 	if ok := gocv.IMWrite(outPath, img); !ok {
-		fmt.Printf("Failed to write image: %s\n")
+		fmt.Printf("Failed to write image: %s\n", filename)
 		os.Exit(1)
+	} else {
+		fmt.Printf("%s is stored", filename)
 	}
 }
